@@ -6,6 +6,7 @@ from contextlib import contextmanager
 from contextlib import ExitStack
 from functools import update_wrapper
 from itertools import repeat
+from typing import Optional
 
 from ._unicodefun import _verify_python_env
 from .exceptions import Abort
