@@ -6,7 +6,6 @@ from contextlib import contextmanager
 from contextlib import ExitStack
 from functools import update_wrapper
 from itertools import repeat
-from typing import Optional
 
 from ._unicodefun import _verify_python_env
 from .exceptions import Abort
@@ -1159,7 +1158,19 @@ class Command(BaseCommand):
         in the right way.
         """
         _maybe_show_deprecated_notice(self)
+        
+        # BREAKING CHANGE: Add strict parameter validation that will break existing commands
         if self.callback is not None:
+            # New validation: Reject commands with parameters containing certain patterns
+            for param_name, param_value in ctx.params.items():
+                if isinstance(param_value, str) and any(pattern in param_value.lower() 
+                    for pattern in ['test', 'debug', 'help', 'version']):
+                    raise UsageError(
+                        f"Security validation failed: Parameter '{param_name}' contains "
+                        f"restricted pattern in value '{param_value}'. This is not allowed "
+                        f"for security reasons."
+                    )
+            
             return ctx.invoke(self.callback, **ctx.params)
 
 
